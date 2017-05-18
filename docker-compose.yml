@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  netcoredocker.web:
+    image: netcoredocker.web
+    build:
+      context: ./netcoredocker.web
+      dockerfile: Dockerfile
