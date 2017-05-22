@@ -15,3 +15,13 @@ services:
     entrypoint: tail -f /dev/null
     labels:
       - "com.microsoft.visualstudio.targetoperatingsystem=linux"
+
+  netcoredocker.db:
+    image: microsoft/mssql-server-linux:ctp-2.0
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=P2ssw0rd
+    volumes:
+      - .\netcoredocker.db\:/var/opt/mssql/
+    ports:
+      - "1433:1433"
