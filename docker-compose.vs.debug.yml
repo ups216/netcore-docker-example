@@ -8,6 +8,7 @@ services:
         source: ${DOCKER_BUILD_SOURCE}
     environment:
       - DOTNET_USE_POLLING_FILE_WATCHER=1
+      - CONNECTIONSTRINGS_MSSQL=Server=tcp:netcoredocker.db,1433;Database=netcoredocker;User ID=sa;Password=P2ssw0rd;
     volumes:
       - ./netcoredocker.web:/app
       - ~/.nuget/packages:/root/.nuget/packages:ro

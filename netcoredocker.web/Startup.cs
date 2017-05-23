@@ -14,7 +14,10 @@ namespace netcoredocker.web
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public IConfigurationRoot Configuration { get; }
+        public ILogger Logger { get; set; }
+
+        public Startup(IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -22,9 +25,14 @@ namespace netcoredocker.web
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
+
+            Logger = loggerFactory.CreateLogger<Startup>();
         }
 
-        public IConfigurationRoot Configuration { get; }
+        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -34,7 +42,8 @@ namespace netcoredocker.web
 
             // change server=localhost before running 
             // update-database
-            var connection = "Server=netcoredocker.db,1433;Database=netcoredocker;User ID=sa;Password=P2ssw0rd;";
+            //var connection = "Server=localhost,1433;Database=netcoredocker;User ID=sa;Password=P2ssw0rd;";
+            var connection = GetConfigure("ConnectionStrings:MSSQL");
             services.AddDbContext<BloggingContext>(options => options.UseSqlServer(connection));
             
         }
@@ -63,6 +72,21 @@ namespace netcoredocker.web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private string GetConfigure(string configName)
+        {
+            string varName = configName.Replace(":", "_").ToUpper();
+
+            string varValue = Environment.GetEnvironmentVariable(varName);
+
+            if (varValue != null && varValue != string.Empty)
+            {
+                Logger.LogInformation("Using Environment Variable [" + varName + "]=" + varValue);
+                return varValue;
+            }
+
+            return Configuration.GetSection(configName).Value;
         }
     }
 }
